@@ -1,16 +1,16 @@
 {
   "name": "boo-server",
   "version": "1.0.0",
+  "description": "Boo profile website",
   "main": "app.js",
   "scripts": {
     "start": "node app.js"
   },
   "dependencies": {
+    "dotenv": "^16.4.0",
+    "ejs": "^3.1.6",
     "express": "^4.18.2",
-    "ejs": "^3.1.9",
-    "mongoose": "^7.6.0",
-    "mongodb-memory-server": "^8.12.0",
-    "dotenv": "^16.3.1",
+    "mongoose": "^8.0.0",
     "body-parser": "^1.20.2"
   }
 }
