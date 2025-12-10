@@ -28,7 +28,8 @@ router.get("/profile/:id?", async (req, res) => {
 });
 
 // Create profile
-router.post("/profile", async (req, res) => {
+router.post("/profiles", async (req, res) => {
+  console.log("POST /boo/profiles HIT", req.body); // <--- ADD THIS
   try {
     const { name, title, description } = req.body;
 

@@ -1,50 +1,42 @@
-const express = require("express");
-const router = express.Router();
-const Profile = require("../models/Profile");
+require('dotenv').config();
 
-// TEST route → shows server running
-router.get("/", (req, res) => {
-  res.send("Boo API running");
-});
+const express = require('express');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const bodyParser = require('body-parser');
 
-// GET profile by ID (or first profile)
-router.get("/profile/:id?", async (req, res) => {
+const profileRoutes = require('./routes/profile');
+const userRoutes = require('./routes/users');
+const commentRoutes = require('./routes/comments');
+
+const app = express();
+
+// Start in-memory MongoDB
+(async () => {
   try {
-    let profile;
-
-    if (req.params.id) {
-      profile = await Profile.findById(req.params.id);
-    } else {
-      profile = await Profile.findOne();
-    }
-
-    if (!profile) return res.send("No profile found");
-
-    res.render("profile_template", { profile });
+    const mongod = await MongoMemoryServer.create();
+    const uri = mongod.getUri();
+    await mongoose.connect(uri);
+    console.log("Connected to in-memory MongoDB");
   } catch (err) {
-    console.error(err);
-    res.send("Error loading profile");
+    console.error("MongoDB connection error:", err);
   }
-});
+})();
 
-// Create profile
-router.post("/profile", async (req, res) => {
-  try {
-    const { name, title, description } = req.body;
+// View engine
+app.set('view engine', 'ejs');
+app.set('views', __dirname + '/views');
 
-    const newProfile = new Profile({
-      name,
-      title,
-      description,
-      image: "/boo/static/default.jpg"
-    });
+// Static
+app.use('/boo', express.static(__dirname + '/public'));
 
-    const saved = await newProfile.save();
-    res.json({ success: true, id: saved._id });
-  } catch (e) {
-    console.error(e);
-    res.status(500).json({ success: false, error: "Failed to create profile" });
-  }
-});
+// Body parser
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 
-module.exports = router;
+// Routes
+app.use('/boo', profileRoutes);
+app.use('/boo/users', userRoutes);
+app.use('/boo/comments', commentRoutes);
+
+module.exports = app;
